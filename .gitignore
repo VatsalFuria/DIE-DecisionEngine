@@ -1,0 +1,14 @@
+# --- General ---
+.DS_Store
+.vscode/
+
+# --- Backend (Python) ---
+backend/.env
+backend/__pycache__/
+backend/venv/
+backend/*.log
+
+# --- Frontend (Node) ---
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
