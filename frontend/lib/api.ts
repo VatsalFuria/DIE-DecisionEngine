@@ -60,7 +60,7 @@ function apiError(
     message,
     details,
     statusCode,
-  } as any;
+  };
 }
 
 function apiSuccess<T>(data: T): ApiResponse<T> {
@@ -77,14 +77,12 @@ function apiSuccess<T>(data: T): ApiResponse<T> {
  */
 export async function processSmartPaste(
   category: string,
-  rawText: string,
-  model?: string
+  rawText: string
 ): Promise<ApiResponse<DecisionState>> {
   try {
     const payload: SmartPasteRequest = {
       category,
       raw_text: rawText,
-      ...(model && { model }),
     };
 
     const response = await fetchWithTimeout<SmartPasteResponse>(
@@ -96,8 +94,8 @@ export async function processSmartPaste(
         },
         body: JSON.stringify(payload),
       },
-      // Longer timeout for LLM inference (especially on CPU)
-      model === "qwen2.5:7b" ? 180000 : 120000
+      // Longer timeout for local LLM inference.
+      180000
     );
 
     return apiSuccess(response.decision_state);
@@ -146,13 +144,11 @@ export async function scoreDecision(
  * Run bias audit on a scored DecisionState.
  */
 export async function auditDecision(
-  state: DecisionState,
-  model?: string
+  state: DecisionState
 ): Promise<ApiResponse<AuditReport>> {
   try {
     const payload: AuditRequest = {
       decision_state: state,
-      ...(model && { model }),
     };
 
     const response = await fetchWithTimeout<AuditReport>(
@@ -164,7 +160,7 @@ export async function auditDecision(
         },
         body: JSON.stringify(payload),
       },
-      model === "qwen2.5:7b" ? 120000 : 60000
+      120000
     );
 
     return apiSuccess(response);

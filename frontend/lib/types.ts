@@ -147,7 +147,6 @@ export interface SensitivityReport {
 export interface SmartPasteRequest {
   category: string;
   raw_text: string;
-  model?: string;
 }
 
 export interface SmartPasteResponse {
@@ -167,7 +166,6 @@ export interface ScoreResponse {
 
 export interface AuditRequest {
   decision_state: DecisionState;
-  model?: string;
 }
 
 export interface SensitivityRequest {

@@ -28,15 +28,9 @@ export function Step3Review() {
     goToStep,
   } = useDecision();
 
-  if (!decisionState) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center", color: COLOR_TOKENS.muted }}>
-        No decision state found. Please start over.
-      </div>
-    );
-  }
-
-  const [criteria, setCriteria] = useState<Criterion[]>(decisionState.criteria);
+  const [criteria, setCriteria] = useState<Criterion[]>(
+    () => decisionState?.criteria || []
+  );
 
   // ── Weight Normalization Logic ─────────────────────────────────────────
 
@@ -103,6 +97,7 @@ export function Step3Review() {
   );
 
   const canScore =
+    !!decisionState &&
     criteria.length >= MIN_CRITERIA_TO_SCORE &&
     decisionState.products.length >= MIN_PRODUCTS_TO_SCORE &&
     Math.abs(totalWeight - 1.0) < 0.01;
@@ -112,7 +107,7 @@ export function Step3Review() {
   // ── Score Handler ──────────────────────────────────────────────────────
 
   const handleScore = useCallback(async () => {
-    if (!canScore) return;
+    if (!canScore || !decisionState) return;
 
     const updated: DecisionState = {
       ...decisionState,
@@ -134,6 +129,14 @@ export function Step3Review() {
       goToStep("score");
     }
   }, [decisionState, criteria, canScore, setDecisionState, setLoading, setError, goToStep]);
+
+  if (!decisionState) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center", color: COLOR_TOKENS.muted }}>
+        No decision state found. Please start over.
+      </div>
+    );
+  }
 
   // ── UI Helpers ─────────────────────────────────────────────────────────
 
@@ -200,7 +203,7 @@ export function Step3Review() {
 
         {/* Criteria List */}
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "40px" }}>
-          {criteria.map((criterion, idx) => (
+          {criteria.map((criterion) => (
             <div
               key={criterion.id}
               style={{

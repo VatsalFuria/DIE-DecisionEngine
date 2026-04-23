@@ -19,10 +19,6 @@ class AuditRequest(BaseModel):
             "Call POST /api/v1/score first if needed."
         ),
     )
-    model: str = Field(
-        default="claude-sonnet-4-20250514",
-        description="Claude model to use for the audit.",
-    )
 
 
 @router.post(
@@ -39,7 +35,7 @@ class AuditRequest(BaseModel):
 )
 async def audit_endpoint(body: AuditRequest) -> AuditReport:
     try:
-        return audit(body.decision_state, model=body.model)
+        return audit(body.decision_state)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

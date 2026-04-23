@@ -24,22 +24,22 @@ export function SensitivityPanel({
   onClose,
   isLoading = false,
 }: SensitivityPanelProps) {
-  if (!isOpen || !report) return null;
-
   // ── Categorize tipping points by stability ────────────────────────────
 
   const stablePoints = useMemo(
-    () => report.tipping_points.filter((tp) => tp.is_stable),
+    () => (report?.tipping_points || []).filter((tp) => tp.is_stable),
     [report]
   );
 
   const fragilePoints = useMemo(
-    () => report.tipping_points.filter((tp) => !tp.is_stable).sort(
+    () => (report?.tipping_points || []).filter((tp) => !tp.is_stable).sort(
       (a, b) =>
         (Math.abs(a.delta_to_swap) || 999) - (Math.abs(b.delta_to_swap) || 999)
     ),
     [report]
   );
+
+  if (!isOpen || !report) return null;
 
   // ── Helper: Get color for stability ────────────────────────────────────
 

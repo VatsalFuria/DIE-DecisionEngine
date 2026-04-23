@@ -8,13 +8,11 @@
 
 import React, { useState, useCallback } from "react";
 import { useDecision } from "@/context/DecisionContext";
-import { DecisionState } from "@/lib/types";
 import { processSmartPaste, formatApiError } from "@/lib/api";
 import {
   STRINGS,
   COLOR_TOKENS,
   FONTS,
-  LLM_MODELS,
   MIN_SMART_PASTE_LENGTH,
 } from "@/lib/constants";
 
@@ -25,7 +23,6 @@ export function Step2Ingest() {
 
   const [mode, setMode] = useState<IngestMode>("smart_paste");
   const [rawText, setRawText] = useState("");
-  const [selectedModel, setSelectedModel] = useState(LLM_MODELS[0].value);
 
   const title = decisionState?.title || "Decision";
   const isSmartPasteValid = rawText.trim().length >= MIN_SMART_PASTE_LENGTH;
@@ -38,7 +35,7 @@ export function Step2Ingest() {
     setLoading(true, STRINGS.STEP2_EXTRACTING);
     setError(null);
 
-    const result = await processSmartPaste(title, rawText, selectedModel);
+    const result = await processSmartPaste(title, rawText);
 
     if (result.error) {
       setError(formatApiError(result));
@@ -59,7 +56,6 @@ export function Step2Ingest() {
     decisionState,
     title,
     rawText,
-    selectedModel,
     isSmartPasteValid,
     setLoading,
     setError,
@@ -71,44 +67,6 @@ export function Step2Ingest() {
 
   const renderSmartPaste = () => (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Model selector */}
-      <div>
-        <label
-          style={{
-            display: "block",
-            fontSize: "12px",
-            fontFamily: FONTS.mono,
-            color: COLOR_TOKENS.amber,
-            letterSpacing: "0.15em",
-            marginBottom: "8px",
-            textTransform: "uppercase",
-          }}
-        >
-          {STRINGS.STEP2_MODEL_LABEL}
-        </label>
-        <select
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            fontSize: "13px",
-            fontFamily: FONTS.body,
-            background: COLOR_TOKENS.surface,
-            border: `1px solid ${COLOR_TOKENS.border}`,
-            borderRadius: "6px",
-            color: COLOR_TOKENS.text,
-            outline: "none",
-          }}
-        >
-          {LLM_MODELS.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {/* Text area */}
       <div>
         <label

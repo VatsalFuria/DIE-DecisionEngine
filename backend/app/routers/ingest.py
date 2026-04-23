@@ -31,12 +31,6 @@ class SmartPasteRequest(BaseModel):
         min_length=20,
         description="Unstructured text block: product specs, blog copy, review snippets, etc.",
     )
-    model: str = Field(
-        default="claude-sonnet-4-20250514",
-        description="Claude model to use for extraction.",
-    )
-
-
 class SmartPasteResponse(BaseModel):
     decision_state: DecisionState
     extraction_debug: ExtractionResult | None = Field(
@@ -56,7 +50,7 @@ class SmartPasteResponse(BaseModel):
     summary="Ingest unstructured text and return a harmonized DecisionState",
     description=(
         "Accepts a category name and a block of raw product text. "
-        "Uses Claude (via instructor) to extract products and features, "
+        "Uses the developer-configured local LLM to extract products and features, "
         "perform semantic harmonization (unit normalization + qualitative→numeric mapping), "
         "and return a fully typed DecisionState ready for TOPSIS scoring."
     ),
@@ -69,7 +63,6 @@ async def process_smart_paste(
         extraction = extract_and_harmonize(
             category=body.category,
             raw_text=body.raw_text,
-            model=body.model,
         )
     except Exception as exc:
         raise HTTPException(

@@ -6,7 +6,6 @@
  */
 
 import { DecisionState } from "./types";
-import { v4 as uuidv4 } from "uuid";
 
 const STORAGE_PREFIX = "die_";
 const SESSIONS_LIST_KEY = `${STORAGE_PREFIX}sessions_list`;
@@ -25,7 +24,10 @@ export interface SessionMetadata {
  * Generate a new UUID for a session.
  */
 export function generateSessionId(): string {
-  return uuidv4();
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
 
 /**

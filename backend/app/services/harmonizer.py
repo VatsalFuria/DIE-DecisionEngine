@@ -6,8 +6,7 @@ import re
 import uuid
 from typing import Any
 
-import instructor
-import anthropic
+from app.core.llm import LLM_MODEL, client
 from pydantic import BaseModel, Field
 
 from app.models.decision import (
@@ -19,15 +18,6 @@ from app.models.decision import (
     Product,
     SessionStatus,
 )
-
-
-# ---------------------------------------------------------------------------
-# Instructor-bound Anthropic client
-# ---------------------------------------------------------------------------
-
-_raw_client = anthropic.Anthropic()          # reads ANTHROPIC_API_KEY from env
-client = instructor.from_anthropic(_raw_client)
-
 
 # ---------------------------------------------------------------------------
 # Intermediate extraction schemas (what the LLM fills in)
@@ -187,21 +177,19 @@ def build_user_prompt(category: str, raw_text: str) -> str:
 def extract_and_harmonize(
     category: str,
     raw_text: str,
-    model: str = "claude-sonnet-4-20250514",
 ) -> ExtractionResult:
     """
     Call the LLM via instructor and return a validated ExtractionResult.
     Raises instructor.exceptions.InstructorRetryException on repeated failure.
     """
-    return client.messages.create(
-        model=model,
-        max_tokens=4096,
-        system=SYSTEM_PROMPT,
+    return client.chat.completions.create(
+        model=LLM_MODEL,
         messages=[
-            {"role": "user", "content": build_user_prompt(category, raw_text)}
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": build_user_prompt(category, raw_text)},
         ],
         response_model=ExtractionResult,
-        max_retries=2,         # instructor retries with the validation error as feedback
+        max_retries=2,
     )
 
 

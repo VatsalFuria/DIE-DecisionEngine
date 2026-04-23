@@ -732,7 +732,7 @@ function AuditSidebar({ audit, isOpen, onClose }) {
                     fontStyle: "italic",
                   }}
                 >
-                  "{audit.tradeoff_summary.headline}"
+                  &quot;{audit.tradeoff_summary.headline}&quot;
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>

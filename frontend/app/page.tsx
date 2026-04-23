@@ -1,7 +1,5 @@
-// frontend/app/page.tsx
-
-import DecisionCockpit from "../components/cockpit/DecisionCockpit";
+import { AppShell } from "@/components/AppShell";
 
 export default function Page() {
-  return <DecisionCockpit />;
+  return <AppShell />;
 }

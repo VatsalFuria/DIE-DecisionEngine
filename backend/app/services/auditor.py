@@ -14,7 +14,7 @@ audit(state: DecisionState) -> AuditReport
 Depends on
 ----------
 - app.models.decision.DecisionState  (with populated scores / rankings)
-- instructor + anthropic              (same pattern as harmonizer.py)
+- instructor + OpenAI-compatible local model client
 """
 
 from __future__ import annotations
@@ -23,8 +23,7 @@ import math
 import statistics
 from typing import Literal
 
-import anthropic
-import instructor
+from app.core.llm import LLM_MODEL, client
 from pydantic import BaseModel, Field
 
 from app.models.decision import (
@@ -33,14 +32,6 @@ from app.models.decision import (
     OptimizationDirection,
     Product,
 )
-
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# LLM client (instructor-patched, same pattern as harmonizer.py)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-_raw_client = anthropic.Anthropic()
-client = instructor.from_anthropic(_raw_client)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -397,7 +388,6 @@ Return ONLY the AuditReport JSON.
 
 def audit(
     state: DecisionState,
-    model: str = "claude-sonnet-4-20250514",
 ) -> AuditReport:
     """
     Run the Decision Auditor on a scored DecisionState.
@@ -405,8 +395,6 @@ def audit(
     Parameters
     ----------
     state   : A DecisionState with populated .scores and .rankings (call score() first).
-    model   : Claude model string.
-
     Returns
     -------
     AuditReport — structured audit with contradictions, trade-offs, and stress-test questions.
@@ -428,11 +416,13 @@ def audit(
     user_prompt   = _build_user_prompt(state, stats, product_table)
 
     # ── LLM call ──
-    report: AuditReport = client.messages.create(
-        model=model,
+    report: AuditReport = client.chat.completions.create(
+        model=LLM_MODEL,
         max_tokens=2048,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ],
         response_model=AuditReport,
         max_retries=2,
     )
